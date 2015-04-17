@@ -9,17 +9,30 @@
 (def canvas (aget (.getElementsByTagName js/document "canvas") 0))
 (def slider (aget (.getElementsByTagName js/document "input") 0))
 (def drawing (.getContext canvas "2d"))
+(def width 200)
+(def height 200)
+(defn canvas-point [[x y]] [(+ x (/ width 2)) (+ y (/ height 2))])
 
 (def radius 30)
+(def draw-points '())
+
+(defn angles [n] (range 0 doublepi (/ doublepi n)))
+
+(defn points [n radius] (map (fn [angle] [(* radius (Math/sin angle)) (* radius (Math/cos angle))]) (angles n)))
 
 (.addEventListener slider "input" (fn []
-  (set! radius (aget slider "value"))))
+  (let [value (aget slider "value")]
+    (set! radius value)
+    (set! draw-points (points 360 radius))
+  )))
 
 (defn draw-scene []
-  (.clearRect drawing 0 0 (aget canvas "width") (aget canvas "height"))
-  (.beginPath drawing)
-  (.arc drawing 100 100 radius 0 doublepi false)
-  (.stroke drawing))
+  (do
+    (.clearRect drawing 0 0 (aget canvas "width") (aget canvas "height"))
+    (.beginPath drawing)
+    (doall (for [point draw-points] (let [[x y] (canvas-point point)] (.lineTo drawing x y))))
+    (.closePath drawing)
+    (.stroke drawing)))
 
 (defn request-frame []
   (.requestAnimationFrame js/window
