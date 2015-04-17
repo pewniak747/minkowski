@@ -9,8 +9,10 @@
 (def canvas (aget (.getElementsByTagName js/document "canvas") 0))
 (def slider (aget (.getElementsByTagName js/document "input") 0))
 (def drawing (.getContext canvas "2d"))
-(def width 200)
-(def height 200)
+(def width 800)
+(def height 800)
+(aset canvas "width" width)
+(aset canvas "height" height)
 (defn canvas-point [[x y]] [(+ x (/ width 2)) (+ y (/ height 2))])
 
 (def radius 30)
