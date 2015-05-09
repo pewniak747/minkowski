@@ -28,7 +28,7 @@
 (.addEventListener slider "input" (fn []
   (let [value (aget slider "value")]
     (set! radius (/ value 100))
-    (set! circles (map (fn [radius] (points 360 radius)) (range 1 4))
+    (set! circles (map (fn [n] (points 360 (* n radius))) (range 1 4))
   ))))
 
 (defn draw-circle [circle]
