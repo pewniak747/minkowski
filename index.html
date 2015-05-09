@@ -1,11 +1,22 @@
 <html>
+  <head>
+    <link href="target/main.css" rel="stylesheet" type="text/stylesheet"></link>
+  </head>
   <body>
-    <h1>Minkowski distance</h1>
-    <form>
-      <input type="range" minimum="0" maximum="100" />
-    </form>
-    <canvas style="border: 1px solid #ddd">
-    </canvas>
+    <section id="sidebar">
+      <div id="sidebar-content">
+        <h1>Minkowski distance</h1>
+        <hr />
+        <br />
+        <form>
+          <input type="range" minimum="0" maximum="100" />
+        </form>
+      </div>
+    </section>
+    <section id="visualization">
+      <canvas>
+      </canvas>
+    </section>
     <script type="text/javascript" src="target/main.js"></script>
   </body>
 </html>
