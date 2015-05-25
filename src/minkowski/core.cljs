@@ -1,5 +1,6 @@
 (ns minkowski.core
   (:require
+    [minkowski.distance :as distance]
     [goog.string :as gstring]
     [goog.string.format]))
 
@@ -14,7 +15,7 @@
 (def slider (aget (.getElementsByTagName js/document "input") 0))
 (def order-field (.getElementById js/document "minkowski-order"))
 (def drawing (.getContext canvas "2d"))
-(def unit-pixels 100)
+(def unit-pixels 200)
 (def width (* 8 unit-pixels))
 (def height (* 8 unit-pixels))
 (aset canvas "width" width)
@@ -22,14 +23,19 @@
 
 (defn canvas-point [[x y]] [(+ (* unit-pixels x) (/ width 2)) (+ (* unit-pixels y) (/ height 2))])
 
-(def radius 0.5)
 (def minkowski-order 2.0)
+(def minkowski-distance (distance/minkowski minkowski-order))
 (def draw-points '())
 (def circles [])
 
 (defn angles [n] (range 0 doublepi (/ doublepi n)))
 
-(defn points [n radius] (map (fn [angle] [(* radius (Math/sin angle)) (* radius (Math/cos angle))]) (angles n)))
+(defn point-euclidean [angle radius]
+  [(* radius (Math/sin angle)) (* radius (Math/cos angle))])
+
+(defn points [n radius]
+  (map (fn [angle]
+    (point-euclidean angle (* radius (/ radius (minkowski-distance (point-euclidean angle radius)))))) (angles n)))
 
 (defn window-resized []
   (let [new-width (aget visualization "clientWidth") new-height (aget visualization "clientHeight")]
@@ -39,18 +45,19 @@
     (aset canvas "height" height)))
 
 (defn recalculate-circles []
-    (set! circles (map (fn [n] (points 360 (* (* 2 n) radius))) (range 1 8))))
+    (set! circles (map (fn [n] (points 360 n)) (range 1 7))))
 (recalculate-circles)
 
 (defn minkowski-order-changed []
-  (aset order-field "textContent" (gstring/format "%.2f" minkowski-order)))
+  (aset order-field "textContent" (gstring/format "%.2f" minkowski-order))
+  (set! minkowski-distance (distance/minkowski minkowski-order)))
+  (.log js/console (array circles))
 (minkowski-order-changed)
 
 (.addEventListener slider "input" (fn []
   (let [value (aget slider "value")]
     (set! minkowski-order (/ value 33))
     (if (> minkowski-order 2.0) (set! minkowski-order (+ 2.0 (* (- minkowski-order 2.0) 10))))
-    (set! radius (/ value 100))
     (minkowski-order-changed)
     (recalculate-circles)
   )))
