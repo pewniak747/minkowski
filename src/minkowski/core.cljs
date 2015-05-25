@@ -1,4 +1,7 @@
-(ns minkowski.core)
+(ns minkowski.core
+  (:require
+    [goog.string :as gstring]
+    [goog.string.format]))
 
 (enable-console-print!)
 
@@ -9,6 +12,7 @@
 (def visualization (.getElementById js/document "visualization"))
 (def canvas (aget (.getElementsByTagName js/document "canvas") 0))
 (def slider (aget (.getElementsByTagName js/document "input") 0))
+(def order-field (.getElementById js/document "minkowski-order"))
 (def drawing (.getContext canvas "2d"))
 (def unit-pixels 100)
 (def width (* 8 unit-pixels))
@@ -19,6 +23,7 @@
 (defn canvas-point [[x y]] [(+ (* unit-pixels x) (/ width 2)) (+ (* unit-pixels y) (/ height 2))])
 
 (def radius 0.5)
+(def minkowski-order 2.0)
 (def draw-points '())
 (def circles [])
 
@@ -37,9 +42,16 @@
     (set! circles (map (fn [n] (points 360 (* (* 2 n) radius))) (range 1 8))))
 (recalculate-circles)
 
+(defn minkowski-order-changed []
+  (aset order-field "textContent" (gstring/format "%.2f" minkowski-order)))
+(minkowski-order-changed)
+
 (.addEventListener slider "input" (fn []
   (let [value (aget slider "value")]
+    (set! minkowski-order (/ value 33))
+    (if (> minkowski-order 2.0) (set! minkowski-order (+ 2.0 (* (- minkowski-order 2.0) 10))))
     (set! radius (/ value 100))
+    (minkowski-order-changed)
     (recalculate-circles)
   )))
 
