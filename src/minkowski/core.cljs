@@ -49,15 +49,16 @@
 (recalculate-circles)
 
 (defn minkowski-order-changed []
-  (aset order-field "textContent" (gstring/format "%.2f" minkowski-order))
+  (let [minkowski-order-text (if (= minkowski-order distance/infinity) "&infin;" (gstring/format "%.2f" minkowski-order))]
+    (aset order-field "innerHTML" minkowski-order-text))
   (set! minkowski-distance (distance/minkowski minkowski-order)))
-  (.log js/console (array circles))
 (minkowski-order-changed)
 
 (.addEventListener slider "input" (fn []
   (let [value (aget slider "value")]
     (set! minkowski-order (/ value 33))
-    (if (> minkowski-order 2.0) (set! minkowski-order (+ 2.0 (* (- minkowski-order 2.0) 10))))
+    (if (> minkowski-order 3.0) (set! minkowski-order distance/infinity)
+      (if (> minkowski-order 2.0) (set! minkowski-order (+ 2.0 (* (- minkowski-order 2.0) 20)))))
     (minkowski-order-changed)
     (recalculate-circles)
   )))
