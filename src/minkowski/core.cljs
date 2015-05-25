@@ -46,19 +46,38 @@
 (.addEventListener js/window "resize" window-resized)
 (window-resized)
 
+(defn draw-coordinates []
+  (do
+    (.save drawing)
+    (aset drawing "strokeStyle" "#dddddd")
+    (aset drawing "lineWidth" 1)
+    (.beginPath drawing)
+    (let [[x y] (canvas-point [-10 0])] (.moveTo drawing x y))
+    (let [[x y] (canvas-point [10 0])] (.lineTo drawing x y))
+    (.closePath drawing)
+    (.stroke drawing)
+    (.beginPath drawing)
+    (let [[x y] (canvas-point [0 -10])] (.moveTo drawing x y))
+    (let [[x y] (canvas-point [0 10])] (.lineTo drawing x y))
+    (.closePath drawing)
+    (.stroke drawing)
+    (.restore drawing)))
+
 (defn draw-circle [circle]
   (do
+    (.save drawing)
     (.beginPath drawing)
     (doall (for [point circle] (let [[x y] (canvas-point point)] (.lineTo drawing x y))))
     (.closePath drawing)
     (.setLineDash drawing (array 3 5))
     (aset drawing "strokeStyle" "gray")
     (.stroke drawing)
-  ))
+    (.restore drawing)))
 
 (defn draw-scene []
   (do
     (.clearRect drawing 0 0 (aget canvas "width") (aget canvas "height"))
+    (draw-coordinates)
     (doall (for [circle circles] (draw-circle circle)))))
 
 (defn request-frame []
