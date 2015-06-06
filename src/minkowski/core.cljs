@@ -13,7 +13,7 @@
 (def height (* 8 unit-pixels))
 (def minkowski-order 2.0)
 (def minkowski-distance (distance/minkowski minkowski-order))
-(def circles [])
+(def isoquants [])
 (def mouse-point [0 0])
 
 
@@ -27,8 +27,8 @@
   (map (fn [angle]
     (point-euclidean angle (* radius (/ radius (minkowski-distance (point-euclidean angle radius)))))) (angles n)))
 
-(defn recalculate-circles []
-    (set! circles (map (fn [n] (points 360 n)) (range 1 7))))
+(defn recalculate-isoquants []
+    (set! isoquants (map (fn [n] (points 360 n)) (range 1 7))))
 
 
 ; UI elements
@@ -60,7 +60,7 @@
     (if (> minkowski-order 3.0) (set! minkowski-order distance/infinity)
       (if (> minkowski-order 2.0) (set! minkowski-order (+ 2.0 (* (- minkowski-order 2.0) 20)))))
     (minkowski-order-changed)
-    (recalculate-circles)))
+    (recalculate-isoquants)))
 
 (defn coordinates-point [[x y]] [(/ (- x (/ width 2)) unit-pixels) (/ (- y (/ height 2)) unit-pixels)])
 
@@ -125,11 +125,11 @@
     (.closePath drawing)
     (.restore drawing)))
 
-(defn draw-circle [circle]
+(defn draw-isoquant [isoquant]
   (do
     (.save drawing)
     (.beginPath drawing)
-    (doall (for [point circle] (let [[x y] (canvas-point point)] (.lineTo drawing x y))))
+    (doall (for [point isoquant] (let [[x y] (canvas-point point)] (.lineTo drawing x y))))
     (.closePath drawing)
     (.setLineDash drawing (array 3 5))
     (aset drawing "strokeStyle" "gray")
@@ -140,7 +140,7 @@
   (do
     (.clearRect drawing 0 0 (aget canvas "width") (aget canvas "height"))
     (draw-coordinates)
-    (doall (for [circle circles] (draw-circle circle)))
+    (doall (for [isoquant isoquants] (draw-isoquant isoquant)))
     (draw-mouse-point)))
 
 (defn request-frame []
@@ -153,7 +153,7 @@
   (aset canvas "width" width)
   (aset canvas "height" height)
 
-  (recalculate-circles)
+  (recalculate-isoquants)
   (minkowski-order-changed)
   (window-resized)
 
