@@ -22,11 +22,12 @@
 (aset canvas "height" height)
 
 (defn canvas-point [[x y]] [(+ (* unit-pixels x) (/ width 2)) (+ (* unit-pixels y) (/ height 2))])
+(defn coordinates-point [[x y]] [(/ (- x (/ width 2)) unit-pixels) (/ (- y (/ height 2)) unit-pixels)])
 
 (def minkowski-order 2.0)
 (def minkowski-distance (distance/minkowski minkowski-order))
-(def draw-points '())
 (def circles [])
+(def mouse-point [0 0])
 
 (defn angles [n] (range 0 doublepi (/ doublepi n)))
 
@@ -63,8 +64,24 @@
     (recalculate-circles)
   )))
 
+(defn mouse-moved [e]
+  (let [
+        rect (.getBoundingClientRect canvas)
+        left (aget rect "left")
+        top (aget rect "top")
+        mouse-left (aget e "clientX")
+        mouse-top (aget e "clientY")
+        canvas-x (- mouse-left left)
+        canvas-y (- mouse-top top)]
+      (set! mouse-point (coordinates-point [canvas-x canvas-y]))))
+
+(defn mouse-left []
+  (set! mouse-point [0 0]))
+
 (.addEventListener js/window "resize" window-resized)
 (window-resized)
+(.addEventListener canvas "mousemove" mouse-moved)
+(.addEventListener canvas "mouseleave" mouse-left)
 
 (defn draw-coordinates []
   (do
@@ -83,6 +100,32 @@
     (.stroke drawing)
     (.restore drawing)))
 
+(defn draw-mouse-point []
+  (do
+    (.save drawing)
+    (.beginPath drawing)
+    (let [[x y] (canvas-point mouse-point)] (.moveTo drawing x y))
+    (let [[x y] (canvas-point [0 0])] (.lineTo drawing x y))
+    (.stroke drawing)
+    (.closePath drawing)
+    (.beginPath drawing)
+    (let [[x y] (canvas-point [0 0])]
+      (.arc drawing x y 3 0 doublepi))
+    (aset drawing "fillStyle" "white")
+    (.fill drawing)
+    (.stroke drawing)
+    (.closePath drawing)
+    (.beginPath drawing)
+    (let [[x y] (canvas-point mouse-point) text-x (+ x 10) text-y (+ y 3)]
+      (.arc drawing x y 3 0 doublepi)
+      (aset drawing "fillStyle" "black")
+      (.fillText drawing (gstring/format "%.2f" (minkowski-distance mouse-point)) text-x text-y))
+    (aset drawing "fillStyle" "white")
+    (.fill drawing)
+    (.stroke drawing)
+    (.closePath drawing)
+    (.restore drawing)))
+
 (defn draw-circle [circle]
   (do
     (.save drawing)
@@ -98,7 +141,8 @@
   (do
     (.clearRect drawing 0 0 (aget canvas "width") (aget canvas "height"))
     (draw-coordinates)
-    (doall (for [circle circles] (draw-circle circle)))))
+    (doall (for [circle circles] (draw-circle circle)))
+    (draw-mouse-point)))
 
 (defn request-frame []
   (.requestAnimationFrame js/window
