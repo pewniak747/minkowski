@@ -25,6 +25,12 @@ python -m SimpleHTTPServer
 
 Then visit http://localhost:8000
 
+## Tests
+
+```
+make test
+```
+
 ## License
 
 Copyright © 2015 Tomasz Pewiński

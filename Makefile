@@ -24,3 +24,6 @@ clean:
 
 dependencies:
 	lein install
+
+test: test/minkowski/core_test.clj
+	lein test
