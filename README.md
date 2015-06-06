@@ -1,36 +1,30 @@
-# minkowski
+# Minkowski distance visualization
 
-FIXME: description
+http://minkowski.pewniak747.info
 
-## Installation
+Written in ClojureScript, using HTML5 Canvas & CSS3.
 
-Download from http://example.com/FIXME.
+## Build
 
-## Usage
+You'll need `make` and `lein` installed.
 
-FIXME: explanation
+```
+make dependencies
+make
+```
 
-    $ java -jar minkowski-0.1.0-standalone.jar [args]
+Built project is available in `dist` directory.
 
-## Options
+## Development
 
-FIXME: listing of options this app accepts.
+```
+make
+cd dist
+python -m SimpleHTTPServer
+```
 
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
+Then visit http://localhost:8000
 
 ## License
 
-Copyright © 2015 FIXME
-
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+Copyright © 2015 Tomasz Pewiński
