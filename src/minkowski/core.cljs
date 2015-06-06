@@ -14,6 +14,7 @@
 (def canvas (aget (.getElementsByTagName js/document "canvas") 0))
 (def slider (aget (.getElementsByTagName js/document "input") 0))
 (def order-field (.getElementById js/document "minkowski-order"))
+(def metric-name-field (.getElementById js/document "metric-name"))
 (def drawing (.getContext canvas "2d"))
 (def unit-pixels 200)
 (def width (* 8 unit-pixels))
@@ -52,7 +53,9 @@
 (defn minkowski-order-changed []
   (let [minkowski-order-text (if (= minkowski-order distance/infinity) "&infin;" (gstring/format "%.2f" minkowski-order))]
     (aset order-field "innerHTML" minkowski-order-text))
-  (set! minkowski-distance (distance/minkowski minkowski-order)))
+  (set! minkowski-distance (distance/minkowski minkowski-order))
+  (let [metric-name (if (= minkowski-order 1.0) "Miejska" (if (= minkowski-order 2.0) "Euklidesowa" (if (= minkowski-order distance/infinity) "Czebyszewa" "Minkowskiego")))] (aset metric-name-field "innerHTML" metric-name))
+  )
 (minkowski-order-changed)
 
 (.addEventListener slider "input" (fn []
