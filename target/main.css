@@ -34,3 +34,14 @@ body {
   height: 100%;
   float: left;
 }
+
+#footer {
+  position: absolute;
+  bottom: 20px;
+}
+
+#footer p {
+  text-align: left;
+  margin: 0;
+  font-size: 0.7em;
+}
