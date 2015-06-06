@@ -15,6 +15,8 @@
 (def minkowski-distance (distance/minkowski minkowski-order))
 (def isoquants [])
 (def mouse-point [0 0])
+(def metric-names {1.0 "Miejska" 2.0 "Euklidesowa" distance/infinity "Czebyszewa"})
+(def default-metric-name "Minkowskiego")
 
 
 ; application logic
@@ -45,7 +47,7 @@
   (let [minkowski-order-text (if (= minkowski-order distance/infinity) "&infin;" (gstring/format "%.2f" minkowski-order))]
     (aset order-field "innerHTML" minkowski-order-text))
   (set! minkowski-distance (distance/minkowski minkowski-order))
-  (let [metric-name (if (= minkowski-order 1.0) "Miejska" (if (= minkowski-order 2.0) "Euklidesowa" (if (= minkowski-order distance/infinity) "Czebyszewa" "Minkowskiego")))] (aset metric-name-field "innerHTML" metric-name)))
+  (let [metric-name (get metric-names minkowski-order default-metric-name)] (aset metric-name-field "innerHTML" metric-name)))
 
 (defn window-resized []
   (let [new-width (aget visualization "clientWidth") new-height (aget visualization "clientHeight")]
