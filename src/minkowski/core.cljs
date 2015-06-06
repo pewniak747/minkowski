@@ -6,30 +6,18 @@
 
 (enable-console-print!)
 
-(println "Hello world!")
-
+; application state
 (def doublepi (* 2 Math/PI))
-
-(def visualization (.getElementById js/document "visualization"))
-(def canvas (aget (.getElementsByTagName js/document "canvas") 0))
-(def slider (aget (.getElementsByTagName js/document "input") 0))
-(def order-field (.getElementById js/document "minkowski-order"))
-(def metric-name-field (.getElementById js/document "metric-name"))
-(def drawing (.getContext canvas "2d"))
 (def unit-pixels 200)
 (def width (* 8 unit-pixels))
 (def height (* 8 unit-pixels))
-(aset canvas "width" width)
-(aset canvas "height" height)
-
-(defn canvas-point [[x y]] [(+ (* unit-pixels x) (/ width 2)) (+ (* unit-pixels y) (/ height 2))])
-(defn coordinates-point [[x y]] [(/ (- x (/ width 2)) unit-pixels) (/ (- y (/ height 2)) unit-pixels)])
-
 (def minkowski-order 2.0)
 (def minkowski-distance (distance/minkowski minkowski-order))
 (def circles [])
 (def mouse-point [0 0])
 
+
+; application logic
 (defn angles [n] (range 0 doublepi (/ doublepi n)))
 
 (defn point-euclidean [angle radius]
@@ -39,6 +27,26 @@
   (map (fn [angle]
     (point-euclidean angle (* radius (/ radius (minkowski-distance (point-euclidean angle radius)))))) (angles n)))
 
+(defn recalculate-circles []
+    (set! circles (map (fn [n] (points 360 n)) (range 1 7))))
+
+
+; UI elements
+(def visualization (.getElementById js/document "visualization"))
+(def canvas (aget (.getElementsByTagName js/document "canvas") 0))
+(def slider (aget (.getElementsByTagName js/document "input") 0))
+(def order-field (.getElementById js/document "minkowski-order"))
+(def metric-name-field (.getElementById js/document "metric-name"))
+(def drawing (.getContext canvas "2d"))
+
+
+; UI callbacks
+(defn minkowski-order-changed []
+  (let [minkowski-order-text (if (= minkowski-order distance/infinity) "&infin;" (gstring/format "%.2f" minkowski-order))]
+    (aset order-field "innerHTML" minkowski-order-text))
+  (set! minkowski-distance (distance/minkowski minkowski-order))
+  (let [metric-name (if (= minkowski-order 1.0) "Miejska" (if (= minkowski-order 2.0) "Euklidesowa" (if (= minkowski-order distance/infinity) "Czebyszewa" "Minkowskiego")))] (aset metric-name-field "innerHTML" metric-name)))
+
 (defn window-resized []
   (let [new-width (aget visualization "clientWidth") new-height (aget visualization "clientHeight")]
     (set! width new-width)
@@ -46,26 +54,15 @@
     (aset canvas "width" width)
     (aset canvas "height" height)))
 
-(defn recalculate-circles []
-    (set! circles (map (fn [n] (points 360 n)) (range 1 7))))
-(recalculate-circles)
-
-(defn minkowski-order-changed []
-  (let [minkowski-order-text (if (= minkowski-order distance/infinity) "&infin;" (gstring/format "%.2f" minkowski-order))]
-    (aset order-field "innerHTML" minkowski-order-text))
-  (set! minkowski-distance (distance/minkowski minkowski-order))
-  (let [metric-name (if (= minkowski-order 1.0) "Miejska" (if (= minkowski-order 2.0) "Euklidesowa" (if (= minkowski-order distance/infinity) "Czebyszewa" "Minkowskiego")))] (aset metric-name-field "innerHTML" metric-name))
-  )
-(minkowski-order-changed)
-
-(.addEventListener slider "input" (fn []
+(defn slider-changed []
   (let [value (aget slider "value")]
     (set! minkowski-order (/ value 33))
     (if (> minkowski-order 3.0) (set! minkowski-order distance/infinity)
       (if (> minkowski-order 2.0) (set! minkowski-order (+ 2.0 (* (- minkowski-order 2.0) 20)))))
     (minkowski-order-changed)
-    (recalculate-circles)
-  )))
+    (recalculate-circles)))
+
+(defn coordinates-point [[x y]] [(/ (- x (/ width 2)) unit-pixels) (/ (- y (/ height 2)) unit-pixels)])
 
 (defn mouse-moved [e]
   (let [
@@ -81,10 +78,9 @@
 (defn mouse-left []
   (set! mouse-point [0 0]))
 
-(.addEventListener js/window "resize" window-resized)
-(window-resized)
-(.addEventListener canvas "mousemove" mouse-moved)
-(.addEventListener canvas "mouseleave" mouse-left)
+
+; UI drawing
+(defn canvas-point [[x y]] [(+ (* unit-pixels x) (/ width 2)) (+ (* unit-pixels y) (/ height 2))])
 
 (defn draw-coordinates []
   (do
@@ -153,4 +149,18 @@
       (draw-scene)
       (request-frame))))
 
-(request-frame)
+(defn start-application []
+  (aset canvas "width" width)
+  (aset canvas "height" height)
+
+  (recalculate-circles)
+  (minkowski-order-changed)
+  (window-resized)
+
+  (.addEventListener slider "input" slider-changed)
+  (.addEventListener js/window "resize" window-resized)
+  (.addEventListener canvas "mousemove" mouse-moved)
+  (.addEventListener canvas "mouseleave" mouse-left)
+  (request-frame))
+
+(start-application)
